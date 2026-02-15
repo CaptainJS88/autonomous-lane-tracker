@@ -6,7 +6,6 @@ A collection of implementation-focused Computer Vision systems, exploring advanc
 ---
 
 ## 🚀 Featured Project: Autonomous Lane Tracker
-> *Link to code: [./lane-detection](./lane-detection)*
 
 **Status:** `Prototype` | **Stack:** `Python`, `OpenCV`, `NumPy`
 
