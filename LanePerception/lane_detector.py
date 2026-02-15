@@ -242,7 +242,98 @@ warped_image = cv2.warpPerspective(img_test_lane_gray, M, img_size)
 plt.imshow(warped_image, cmap='gray')
 plt.show()
 
+# Now to create a canny binary warped image using our M transform
 
+canny_warped = cv2.warpPerspective(img_test_lane_canny1, M, img_size)
 
+histogram = np.sum(canny_warped, axis=0)
+width = len(histogram)
+midpoint = width // 2
 
+left_index_histogram = np.argmax(histogram[:midpoint])
+right_index_histogram = np.argmax(histogram[midpoint:])
 
+print(histogram, "histogram")
+spike_coordinates = [left_index_histogram, right_index_histogram  + midpoint]
+print(spike_coordinates[0], spike_coordinates[1],"Left and Right index")
+
+leftx_current = spike_coordinates[0]
+rightx_current = spike_coordinates[1]
+margin = 100
+
+plt.imshow(canny_warped)
+plt.show()
+
+nonzero = canny_warped.nonzero()
+nonzero_y = np.array(nonzero[0])
+nonzero_x = np.array(nonzero[1])
+
+minpix = 50
+
+# ===============================================================
+# 9 Windows Lane Detection (Find Pixels & Draw Visualization)
+# ===============================================================
+
+# 1. Setup the windows and lists
+nwindows = 9
+window_height = int(h // nwindows)
+nonzero = canny_warped.nonzero()
+nonzero_y = np.array(nonzero[0])
+nonzero_x = np.array(nonzero[1])
+
+# Initialize empty lists to receive left and right lane pixel indices
+left_lane_inds = []
+right_lane_inds = []
+
+# Create an output image to draw on and visualize the result
+out_img = np.dstack((canny_warped, canny_warped, canny_warped)) * 255
+
+# 2. Loop through the windows
+for i in range(nwindows):
+    # Identify window boundaries
+    win_y_low = h - (i * window_height)       # Bottom edge (larger y)
+    win_y_high = h - ((i + 1) * window_height) # Top edge (smaller y)
+    
+    # Left Lane Boundaries
+    win_xleft_low = leftx_current - margin
+    win_xleft_high = leftx_current + margin
+    
+    # Right Lane Boundaries
+    win_xright_low = rightx_current - margin
+    win_xright_high = rightx_current + margin
+
+    # DRAW THE WINDOWS (Green for Left, Blue for Right) on the visualization image
+    cv2.rectangle(out_img, (win_xleft_low, win_y_high), (win_xleft_high, win_y_low), (0, 255, 0), 2) 
+    cv2.rectangle(out_img, (win_xright_low, win_y_high), (win_xright_high, win_y_low), (0, 0, 255), 2) 
+
+    # Identify the nonzero pixels in x and y within the window
+    good_left_inds = ((nonzero_y >= win_y_high) & (nonzero_y < win_y_low) & 
+                      (nonzero_x >= win_xleft_low) & (nonzero_x < win_xleft_high)).nonzero()[0]
+    good_right_inds = ((nonzero_y >= win_y_high) & (nonzero_y < win_y_low) & 
+                       (nonzero_x >= win_xright_low) & (nonzero_x < win_xright_high)).nonzero()[0]
+    
+    # Append indices to the lists
+    left_lane_inds.append(good_left_inds)
+    right_lane_inds.append(good_right_inds)
+    
+    # Recenter next window if we found enough pixels
+    if len(good_left_inds) > minpix:
+        leftx_current = int(np.mean(nonzero_x[good_left_inds]))
+    if len(good_right_inds) > minpix:
+        rightx_current = int(np.mean(nonzero_x[good_right_inds]))
+
+# 3. Concatenate the arrays of indices (Flattening the list)
+left_lane_inds = np.concatenate(left_lane_inds)
+right_lane_inds = np.concatenate(right_lane_inds)
+
+# 4. Extract pixel coordinates
+leftx = nonzero_x[left_lane_inds]
+lefty = nonzero_y[left_lane_inds] 
+rightx = nonzero_x[right_lane_inds]
+righty = nonzero_y[right_lane_inds]
+
+# Visualize the final result with the boxes
+plt.figure(figsize=(10, 7))
+plt.imshow(out_img)
+plt.title("Sliding Window Search")
+plt.show()
