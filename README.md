@@ -1,11 +1,4 @@
-# Computer Vision Engineering Portfolio
-**Abhishek Lal** | *M.S. Computer Science, UT Arlington*
-
-A collection of implementation-focused Computer Vision systems, exploring advanced techniques in autonomous navigation, feature extraction, and real-time image processing.
-
----
-
-## 🚀 Featured Project: Autonomous Lane Tracker
+## Autonomous Lane Tracker
 
 **Status:** `Prototype` | **Stack:** `Python`, `OpenCV`, `NumPy`
 
