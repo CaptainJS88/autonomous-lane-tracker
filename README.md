@@ -1,31 +1,60 @@
-## Autonomous Lane Tracker
+# Autonomous Lane Tracker Playground
 
-**Status:** `Prototype` | **Stack:** `Python`, `OpenCV`, `NumPy`
+This project is my lightweight lane-detection pipeline for experimenting with classical computer vision on local road images and videos.
 
-A real-time lane topology extraction system designed for autonomous vehicle path planning. This module implements a geometric computer vision pipeline to identify lane boundaries in varied lighting conditions without relying on "black box" deep learning models.
+The basic flow is:
+1. read image/video frames from `Images/` and `Videos/`
+2. run preprocessing (grayscale + blur + Canny + ROI masking)
+3. detect lane boundaries with Hough lines and visualize overlays
 
-**Key Technical Implementations:**
-* **Noise Reduction:** Gaussian smoothing to suppress high-frequency noise.
-* **Edge Detection:** Canny operator with dynamic thresholding for gradient isolation.
-* **ROI Optimization:** Polygonal masking to isolate drivable surface area, reducing computational load by ~40%.
-* **Trajectory Modeling:** Probabilistic Hough Transform for collinear point detection and linear extrapolation.
+I kept it simple on purpose so it's easy to tweak thresholds, ROI geometry, and line-fitting behavior.
 
----
+## What each file does
 
-## 📂 Other Modules
+- `LanePerception/lane_detector.py`: full end-to-end script that:
+  - runs lane detection on a sample image
+  - processes video frame-by-frame
+  - writes `Videos/output_lanes.mp4`
+  - includes perspective-warp + sliding-window lane search experiments
+- `LanePerception/Images/`: sample road images used for testing.
+- `LanePerception/Videos/`: input clips and processed output video.
+- `LanePerception/Samples/`: extra assets for quick local experiments.
+- `LanePerception/README.md`: module-level notes and portfolio context.
 
-### 📹 [Coming Soon] Object Detection & Tracking
-* Implementation of YOLO/SSD architectures for real-time object classification.
-* Focus on vehicle and pedestrian detection in urban environments.
+## Requirements
 
----
+- Python 3
+- `pip`
+- Python packages: `opencv-python`, `numpy`, `matplotlib`, `Pillow`
 
-## 🛠 Technical Stack
-* **Core:** Python 3.9+, C++
-* **Vision & Math:** OpenCV, NumPy, SciPy, Matplotlib
-* **Deep Learning:** PyTorch, TensorFlow (Planned Integration)
+## Setup
 
----
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install opencv-python numpy matplotlib pillow
+```
 
-## 📬 Contact
-[LinkedIn](https://www.linkedin.com/in/abhishek-l-43b2a1154/) | [Email](mailto:abhishek.lal1927@gmail.com)
+## Run
+
+From the project root:
+
+```bash
+python LanePerception/lane_detector.py
+```
+
+## Inputs and outputs
+
+- Inputs:
+  - `LanePerception/Images/test_lane.jpg`
+  - `LanePerception/Videos/solidWhiteRight.mp4`
+- Outputs:
+  - visual debug plots (Matplotlib windows)
+  - real-time video preview window (OpenCV)
+  - `LanePerception/Videos/output_lanes.mp4`
+
+## Notes
+
+- If a window does not appear, confirm your environment supports GUI rendering for OpenCV/Matplotlib.
+- For quick experiments, start by tuning Canny thresholds and ROI points in `lane_detector.py`.
+- The script currently combines multiple experiments in one file, which is intentional for rapid iteration.
